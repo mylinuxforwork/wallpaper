@@ -1,4 +1,4 @@
-# Wallpaper collection
+# ML4W Wallpaper Collection
 
 My personal wallpaper collection that fits best to tiling window managers.
 
@@ -8,7 +8,7 @@ Clone the directory from your home directory.
 
 ```
 cd
-git clone --depth=1 https://gitlab.com/stephan-raabe/wallpaper.git
+git clone --depth=1 https://github.com/mylinuxforwork/wallpaper.git
 cd wallpaper/
 ```
 
@@ -18,5 +18,5 @@ You can update the wallpapers with
 
 ```
 cd ~/wallpaper
-./install.sh
+git pull
 ```
