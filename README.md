@@ -18,5 +18,5 @@ You can update the wallpapers with
 
 ```
 cd ~/wallpaper
-./install.sh
+git pull
 ```
