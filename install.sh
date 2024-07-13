@@ -15,15 +15,18 @@ EOF
 echo -e "${NONE}"
 if [ ! -d .git ]; then
     echo "Do you want to download the wallpapers from repository "
-    echo "https://gitlab.com/stephan-raabe/wallpaper/ ?"
+    echo "https://github.com/mylinuxforwork/wallpaper/ ?"
     echo ""
     if gum confirm "Do you want to download the repository?" ;then
-        wget -P ~/Downloads/ https://gitlab.com/stephan-raabe/wallpaper/-/archive/main/wallpaper-main.zip
-        unzip -o ~/Downloads/wallpaper-main.zip -d ~/Downloads/
+        if [ ! -d ~/Downloads/wallpaper ]; then
+            mkdir -p ~/Downloads/wallpaper
+        fi
+        wget -P ~/Downloads/wallpaper https://github.com/mylinuxforwork/wallpaper/archive/refs/heads/main.zip
+        unzip -o ~/Downloads/wallpaper/main.zip -d ~/Downloads/wallpaper/
         if [ ! -d ~/wallpaper/ ]; then
             mkdir ~/wallpaper
         fi
-        cp ~/Downloads/wallpaper-main/* ~/wallpaper/
+        cp ~/Downloads/wallpaper/* ~/wallpaper/
         echo "Wallpapers from the repository installed successfully."
     elif [ $? -eq 130 ]; then
         exit 130
