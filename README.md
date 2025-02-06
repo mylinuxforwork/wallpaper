@@ -20,3 +20,7 @@ You can update the wallpapers with
 cd ~/wallpaper
 git pull
 ```
+## Wallpaper Resources
+
+https://www.reddit.com/r/wallpapers/
+https://4kwallpapers.com
