@@ -30,3 +30,5 @@ Great download resources for wallpapers are:
 https://www.reddit.com/r/wallpapers/
 
 https://4kwallpapers.com
+
+https://x.com/wallsbyjfl
