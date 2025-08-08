@@ -31,4 +31,4 @@ https://www.reddit.com/r/wallpapers/
 
 https://4kwallpapers.com
 
-https://x.com/wallsbyjfl
+https://buymeacoffee.com/wallsbyjfl/posts/11032
