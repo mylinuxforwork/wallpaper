@@ -1,0 +1,87 @@
+---
+export interface Wallpaper {
+  id: string;
+  title: string;
+  category: string;
+  filename: string;
+  path: string;
+  width: number;
+  height: number;
+  aspectRatio: number;
+  orientation: string;
+  fileSizeFormatted: string;
+  fileSizeBytes: number;
+  format: string;
+  cdnUrl: string;
+  cdnFallbackUrl: string;
+  thumbUrl: string;
+  blurDataUrl?: string;
+}
+
+interface Props {
+  wallpaper: Wallpaper;
+  index: number;
+}
+
+const { wallpaper, index } = Astro.props;
+const thumbUrl = wallpaper.thumbUrl || wallpaper.cdnUrl;
+---
+
+<div
+  class="wallpaper-card group relative break-inside-avoid mb-4 rounded-[var(--radius)] overflow-hidden bg-[var(--card)] border border-[var(--border)] ambient-shadow hover-lift cursor-pointer transition-all duration-300 select-none"
+  data-id={wallpaper.id}
+  data-category={wallpaper.category}
+  data-title={wallpaper.title.toLowerCase()}
+  data-wallpaper={JSON.stringify(wallpaper)}
+  style={`aspect-ratio: ${wallpaper.aspectRatio};`}
+>
+  <!-- Background shimmer/muted state -->
+  <div class="absolute inset-0 bg-[var(--muted)]"></div>
+
+  <!-- Actual WebP Thumbnail (Served via CDN on-the-fly resizer) -->
+  <img
+    src={thumbUrl}
+    alt={wallpaper.title}
+    width={wallpaper.width}
+    height={wallpaper.height}
+    loading="lazy"
+    decoding="async"
+    class="thumb-img absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:scale-105 transition-transform duration-500"
+    onload="this.classList.remove('opacity-0'); this.classList.add('opacity-100');"
+  />
+
+  <!-- Gradient Overlay on Hover -->
+  <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3.5 text-white">
+    
+    <!-- Top Bar: Heart Favorite Button -->
+    <div class="flex items-center justify-end">
+      <button
+        type="button"
+        title="Favorite wallpaper"
+        class="card-fav-btn p-2 rounded-full bg-black/40 backdrop-blur-md hover:bg-black/60 transition-transform active:scale-90"
+        data-fav-id={wallpaper.id}
+      >
+        <svg class="w-4 h-4 text-white/80 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Bottom Bar: Title, Category & Resolution -->
+    <div class="space-y-1 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+      <div class="flex items-center justify-between gap-2">
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-white/20 backdrop-blur-md text-white tracking-wide">
+          {wallpaper.category}
+        </span>
+        <span class="text-[10px] font-mono text-white/80 bg-black/40 px-1.5 py-0.5 rounded">
+          {wallpaper.width}×{wallpaper.height}
+        </span>
+      </div>
+
+      <h3 class="text-sm font-serif font-medium text-white line-clamp-1 leading-snug">
+        {wallpaper.title}
+      </h3>
+    </div>
+
+  </div>
+</div>

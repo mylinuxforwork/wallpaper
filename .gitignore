@@ -1,1 +1,18 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.astro/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs & temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 effects

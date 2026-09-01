@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "mylinuxforwork/wallpaper — Curated 4K Wallpaper Showcase",
+  description = "A buttery-smooth, static wallpaper gallery featuring 218 curated desktop wallpapers with zero bloat and fast CDN delivery."
+} = Astro.props;
+
+// Use one of the curated wallpapers for OG image
+const ogImageUrl = "https://cdn.jsdelivr.net/gh/mylinuxforwork/wallpaper@main/Nature/sunset-mountain-beautiful.jpg";
+---
+
+<!catch-all>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href=`${import.meta.env.BASE_URL}/favicon.svg` />
+    
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={Astro.url} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={Astro.url} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={ogImageUrl} />
+
+    <!-- Theme Inline Script to Prevent FOUC -->
+    <script is:inline>
+      (function() {
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme === 'dark' || (!storedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+    </script>
+  </head>
+  <body class="min-h-screen flex flex-col antialiased">
+    <slot />
+
+    <!-- Lenis Smooth Scroll -->
+    <script>
+      import Lenis from 'lenis';
+
+      // Initialize Lenis only if reduced motion is not preferred
+      const prefersReducedMotion = window.matchMedia('(prefers-color-scheme: reduce)').matches;
+      if (!prefersReducedMotion) {
+        const lenis = new Lenis({
+          duration: 1.2,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true
+        });
+
+        function raf(time: number) {
+          lenis.raf(time);
+          requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+      }
+    </script>
+  </body>
+</html>

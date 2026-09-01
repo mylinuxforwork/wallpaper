@@ -1,0 +1,21 @@
+{
+  "name": "wallpaper-gallery",
+  "version": "1.0.0",
+  "description": "Buttery-smooth static wallpaper gallery webapp for GitHub Pages showcasing mylinuxforwork/wallpaper",
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/generate-manifest.mjs && astro dev",
+    "prebuild": "node scripts/generate-manifest.mjs",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/tailwind": "^6.0.2",
+    "astro": "^5.0.0",
+    "gsap": "^3.12.5",
+    "lenis": "^1.1.18",
+    "sharp": "^0.33.5",
+    "tailwindcss": "^3.4.19"
+  },
+  "license": "GPL-2.0"
+}

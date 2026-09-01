@@ -1,0 +1,108 @@
+---
+interface Props {
+  totalCount: number;
+}
+
+const { totalCount } = Astro.props;
+---
+
+<header class="sticky top-0 z-40 w-full backdrop-blur-md bg-[var(--background)]/85 border-b border-[var(--border)] transition-colors duration-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+    
+    <!-- Brand / Title -->
+    <div class="flex items-center gap-3">
+      <a href="#" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-2xl bg-[var(--primary)] text-[var(--primary-foreground)] flex items-center justify-center font-bold shadow-sm transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-serif font-semibold tracking-tight text-[var(--foreground)] leading-none group-hover:text-[var(--accent)] transition-colors">
+            wallpaper
+          </h1>
+          <span class="text-xs text-[var(--muted-foreground)] font-mono tracking-tight">
+            mylinuxforwork
+          </span>
+        </div>
+      </a>
+
+      <!-- Total count pill -->
+      <span class="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-mono bg-[var(--muted)] text-[var(--muted-foreground)] border border-[var(--border)]">
+        {totalCount} wallpapers
+      </span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex items-center gap-2">
+      
+      <!-- Surprise Me / Shuffle -->
+      <button
+        id="btn-shuffle"
+        type="button"
+        title="Surprise me with a random wallpaper"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius)] text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:border-[var(--ring)] hover:bg-[var(--sidebar-accent)] transition-all duration-200 active:scale-95 cursor-pointer"
+      >
+        <svg class="w-4 h-4 text-[var(--accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 15.12a2 2 0 01-1.183-1.875V5.5m15.011 9.928A2 2 0 0020 14.5v-9a2 2 0 00-1.586-1.954l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L5.6 3.8a2 2 0 00-1.183 1.875v8.32a2 2 0 001.183 1.875l2.387.477a6 6 0 003.86-.517l.318-.158a6 6 0 013.86-.517l2.387.477a2 2 0 001.183-1.875v-9" />
+        </svg>
+        <span class="hidden md:inline">Surprise Me</span>
+      </button>
+
+      <!-- Favorites Filter Toggle -->
+      <button
+        id="btn-favorites"
+        type="button"
+        title="View favorite wallpapers"
+        class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius)] text-xs font-medium bg-[var(--secondary)] text-[var(--secondary-foreground)] border border-[var(--border)] hover:border-[var(--ring)] transition-all duration-200 active:scale-95 cursor-pointer"
+      >
+        <svg id="fav-icon" class="w-4 h-4 text-[var(--muted-foreground)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+        <span class="hidden sm:inline">Favorites</span>
+        <span id="fav-count" class="hidden font-mono px-1.5 py-0.2 rounded-full text-[10px] bg-[var(--primary)] text-[var(--primary-foreground)]">0</span>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button
+        id="btn-theme"
+        type="button"
+        title="Toggle Theme"
+        aria-label="Toggle theme"
+        class="p-2.5 rounded-[var(--radius)] bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)] hover:border-[var(--ring)] transition-all duration-200 active:scale-95 cursor-pointer"
+      >
+        <!-- Sun icon (for dark mode) -->
+        <svg id="theme-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <!-- Moon icon (for light mode) -->
+        <svg id="theme-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+        </svg>
+      </button>
+
+      <!-- Source Repo GitHub Link -->
+      <a
+        href="https://github.com/mylinuxforwork/wallpaper"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="View Source Repository on GitHub"
+        class="p-2.5 rounded-[var(--radius)] bg-[var(--secondary)] text-[var(--foreground)] border border-[var(--border)] hover:border-[var(--ring)] transition-all duration-200"
+      >
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+        </svg>
+      </a>
+
+    </div>
+  </div>
+</header>
+
+<script>
+  // Handle Theme Toggle
+  const btnTheme = document.getElementById('btn-theme');
+  btnTheme?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  });
+</script>

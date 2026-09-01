@@ -1,0 +1,180 @@
+---
+---
+
+<div
+  id="lightbox-modal"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-xl opacity-0 pointer-events-none transition-opacity duration-300 select-none"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Wallpaper Preview Lightbox"
+>
+  <!-- Main Overlay Container -->
+  <div class="relative w-full h-full flex flex-col md:flex-row items-center justify-between overflow-hidden">
+    
+    <!-- Close Button Top Right -->
+    <button
+      id="lightbox-close"
+      type="button"
+      title="Close Lightbox (Esc)"
+      class="absolute top-4 right-4 z-50 p-3 rounded-full bg-black/60 text-white/90 hover:bg-black/90 hover:text-white border border-white/10 backdrop-blur-md transition-all duration-200 cursor-pointer active:scale-90"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+
+    <!-- Previous Navigation Button -->
+    <button
+      id="lightbox-prev"
+      type="button"
+      title="Previous Wallpaper (←)"
+      class="absolute left-4 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-black/60 text-white/90 hover:bg-black/90 hover:text-white border border-white/10 backdrop-blur-md transition-all duration-200 cursor-pointer active:scale-90"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
+    <!-- Next Navigation Button -->
+    <button
+      id="lightbox-next"
+      type="button"
+      title="Next Wallpaper (→)"
+      class="absolute right-4 md:right-80 top-1/2 -translate-y-1/2 z-40 p-3 rounded-full bg-black/60 text-white/90 hover:bg-black/90 hover:text-white border border-white/10 backdrop-blur-md transition-all duration-200 cursor-pointer active:scale-90"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+
+    <!-- Image Display Area -->
+    <div class="relative flex-1 w-full h-full flex items-center justify-center p-4 md:p-8">
+      
+      <!-- Loading Spinner / Shimmer -->
+      <div id="lightbox-loader" class="absolute flex flex-col items-center gap-3 text-white/70">
+        <svg class="w-8 h-8 animate-spin text-[var(--primary)]" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <span class="text-xs font-mono">Loading full 4K original...</span>
+      </div>
+
+      <!-- High Resolution Image -->
+      <img
+        id="lightbox-img"
+        src=""
+        alt=""
+        class="max-w-full max-h-full object-contain rounded-lg shadow-2xl opacity-0 transition-opacity duration-300"
+      />
+    </div>
+
+    <!-- Metadata Sidebar Drawer -->
+    <div class="w-full md:w-80 h-auto md:h-full bg-black/80 backdrop-blur-2xl border-t md:border-t-0 md:border-l border-white/10 p-6 flex flex-col justify-between space-y-6 text-white overflow-y-auto">
+      
+      <div class="space-y-5">
+        <!-- Category Badge & Index -->
+        <div class="flex items-center justify-between">
+          <span id="lb-category" class="px-2.5 py-1 rounded-md text-xs font-medium bg-white/10 border border-white/10 text-[var(--primary)]">
+            Category
+          </span>
+          <span id="lb-index" class="text-xs font-mono text-white/50">
+            1 of 218
+          </span>
+        </div>
+
+        <!-- Editorial Title -->
+        <div>
+          <h2 id="lb-title" class="text-xl md:text-2xl font-serif font-semibold leading-tight text-white tracking-tight">
+            Wallpaper Title
+          </h2>
+          <p id="lb-filename" class="text-xs font-mono text-white/40 mt-1 truncate">
+            filename.jpg
+          </p>
+        </div>
+
+        <div class="h-px bg-white/10"></div>
+
+        <!-- Technical Metadata Grid (IBM Plex Mono) -->
+        <div class="space-y-3 font-mono text-xs text-white/70">
+          
+          <div class="flex items-center justify-between">
+            <span class="text-white/40">Resolution</span>
+            <span id="lb-resolution" class="font-medium text-white">3840 × 2160</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-white/40">File Size</span>
+            <span id="lb-filesize" class="font-medium text-white">4.8 MB</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-white/40">Format</span>
+            <span id="lb-format" class="font-medium text-white">PNG</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-white/40">Orientation</span>
+            <span id="lb-orientation" class="font-medium text-white capitalize">Landscape</span>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <span class="text-white/40">License</span>
+            <span class="font-medium text-[var(--primary)]">GPL-2.0</span>
+          </div>
+
+        </div>
+
+        <div class="h-px bg-white/10"></div>
+
+        <div class="text-[11px] text-white/40 leading-relaxed">
+          Source: <a href="https://github.com/mylinuxforwork/wallpaper" target="_blank" rel="noopener" class="underline hover:text-white">mylinuxforwork/wallpaper</a>. Served via jsDelivr CDN.
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-2.5 pt-4">
+        
+        <!-- Download Original Button -->
+        <button
+          id="lb-btn-download"
+          type="button"
+          class="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-[var(--radius)] bg-[var(--primary)] text-[var(--primary-foreground)] text-xs font-semibold hover:opacity-90 transition-all active:scale-95 shadow-md cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          <span id="lb-download-text">Download 4K Original</span>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <!-- Copy CDN Link -->
+          <button
+            id="lb-btn-copy"
+            type="button"
+            class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-[var(--radius)] bg-white/10 text-white text-xs font-medium hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <span id="copy-btn-text">Copy Link</span>
+          </button>
+
+          <!-- Favorite Toggle Button -->
+          <button
+            id="lb-btn-fav"
+            type="button"
+            class="px-3.5 py-2.5 rounded-[var(--radius)] bg-white/10 text-white text-xs font-medium hover:bg-white/20 transition-all active:scale-95 cursor-pointer"
+            title="Bookmark wallpaper"
+          >
+            <svg id="lb-fav-icon" class="w-4 h-4 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.684a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

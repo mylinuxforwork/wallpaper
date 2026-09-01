@@ -1,0 +1,208 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Lora:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --card: #fdfdfd;
+  --ring: #AFBEA5;
+  --input: #ebebeb;
+  --muted: #f5f5f5;
+  --accent: #495940;
+  --border: #e7e7ee;
+  --radius: 1.4rem;
+  --chart-1: #4ac885;
+  --chart-2: #7033ff;
+  --chart-3: #fd822b;
+  --chart-4: #3276e4;
+  --chart-5: #747474;
+  --popover: #fcfcfc;
+  --primary: #AFBEA5;
+  --sidebar: #f5f8fb;
+  --spacing: 0.27rem;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --secondary: #edf0f4;
+  --background: #fdfdfd;
+  --font-serif: 'Lora', serif;
+  --foreground: #000000;
+  --destructive: #b3191f;
+  --shadow-blur: 3px;
+  --shadow-color: #000000;
+  --sidebar-ring: #AFBEA5;
+  --shadow-spread: 0px;
+  --letter-spacing: -0.025em;
+  --shadow-opacity: 0.16;
+  --sidebar-accent: #e4eae1;
+  --sidebar-border: #ebebeb;
+  --card-foreground: #000000;
+  --shadow-offset-x: 0px;
+  --shadow-offset-y: 2px;
+  --sidebar-primary: #000000;
+  --muted-foreground: #878787;
+  --accent-foreground: #FFFF;
+  --popover-foreground: #000000;
+  --primary-foreground: #000000;
+  --sidebar-foreground: #000000;
+  --secondary-foreground: #080808;
+  --destructive-foreground: #ffffff;
+  --sidebar-accent-foreground: #000000;
+  --sidebar-primary-foreground: #ffffff;
+}
+
+.dark {
+  --card: #100d08;
+  --ring: #AFBEA5;
+  --input: #1a150e;
+  --muted: #1e1a14;
+  --accent: #495940;
+  --border: #2f281b;
+  --radius: 1.4rem;
+  --chart-1: #408a0f;
+  --chart-2: #59a626;
+  --chart-3: #73bd42;
+  --chart-4: #a9e382;
+  --chart-5: #AFBEA5;
+  --popover: #0b0905;
+  --primary: #AFBEA5;
+  --sidebar: #040302;
+  --spacing: 0.27rem;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --secondary: #26211a;
+  --background: #070503;
+  --font-serif: 'Lora', serif;
+  --foreground: #f9f8f7;
+  --destructive: #b3191f;
+  --shadow-blur: 12px;
+  --shadow-color: #000000;
+  --sidebar-ring: #AFBEA5;
+  --shadow-spread: 0px;
+  --letter-spacing: -0.025em;
+  --shadow-opacity: 0.35;
+  --sidebar-accent: #495940;
+  --sidebar-border: #272117;
+  --card-foreground: #f9f8f7;
+  --shadow-offset-x: 0px;
+  --shadow-offset-y: 2px;
+  --sidebar-primary: #AFBEA5;
+  --muted-foreground: #928f8a;
+  --accent-foreground: #FFF;
+  --popover-foreground: #f9f8f7;
+  --primary-foreground: #040302;
+  --sidebar-foreground: #f0eeeb;
+  --secondary-foreground: #e7e4df;
+  --destructive-foreground: #f9f8f7;
+  --sidebar-accent-foreground: #FFF;
+  --sidebar-primary-foreground: #040302;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  letter-spacing: var(--letter-spacing);
+  background-color: var(--background);
+  color: var(--foreground);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  min-height: 100vh;
+  transition: background-color 200ms ease, color 200ms ease;
+  overflow-x: hidden;
+}
+
+svg {
+  max-width: 100%;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Utility Shadow Class */
+.ambient-shadow {
+  box-shadow: var(--shadow-offset-x) var(--shadow-offset-y) var(--shadow-blur) var(--shadow-spread) rgba(0, 0, 0, var(--shadow-opacity));
+}
+
+.hover-lift {
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25);
+}
+
+/* Shimmer Loading Effect */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    var(--secondary) 50%,
+    var(--muted) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Heart Pop Animation */
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.heart-active {
+  color: var(--destructive) !important;
+  fill: var(--destructive) !important;
+  animation: heartPop 300ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* View Transitions Support */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Accessibility reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

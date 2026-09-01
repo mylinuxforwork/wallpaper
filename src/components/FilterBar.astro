@@ -1,0 +1,96 @@
+---
+interface CategoryItem {
+  name: string;
+  count: number;
+}
+
+interface Props {
+  categories: CategoryItem[];
+  totalCount: number;
+}
+
+const { categories, totalCount } = Astro.props;
+---
+
+<div class="sticky top-20 z-30 w-full backdrop-blur-md bg-[var(--background)]/90 border-b border-[var(--border)] py-3 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+  <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+    
+    <!-- Category Chips Carousel -->
+    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 pr-2 scroll-smooth">
+      
+      <!-- All chip -->
+      <button
+        type="button"
+        data-category="All"
+        class="category-chip active flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-[var(--border)] bg-[var(--secondary)] text-[var(--secondary-foreground)] hover:border-[var(--ring)] transition-all duration-200 cursor-pointer"
+      >
+        <span>All</span>
+        <span class="font-mono text-[10px] opacity-70">({totalCount})</span>
+      </button>
+
+      {categories.map(cat => (
+        <button
+          type="button"
+          data-category={cat.name}
+          class="category-chip flex-shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:border-[var(--ring)] hover:bg-[var(--secondary)] transition-all duration-200 cursor-pointer"
+        >
+          <span>{cat.name}</span>
+          <span class="font-mono text-[10px] opacity-60">({cat.count})</span>
+        </button>
+      ))}
+
+    </div>
+
+    <!-- Search Input & Count Indicator -->
+    <div class="flex items-center gap-3 flex-shrink-0">
+      
+      <div class="relative flex-1 md:w-64">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--muted-foreground)]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search title, category..."
+          class="w-full pl-9 pr-8 py-1.5 text-xs rounded-[var(--radius)] bg-[var(--input)] text-[var(--foreground)] border border-[var(--border)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)] focus:border-transparent transition-all duration-200 placeholder:text-[var(--muted-foreground)]"
+        />
+        <button
+          id="search-clear"
+          type="button"
+          title="Clear search"
+          class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[var(--muted-foreground)] hover:text-[var(--foreground)] hidden cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Active Count Indicator -->
+      <div id="results-count" class="text-xs font-mono text-[var(--muted-foreground)] flex-shrink-0">
+        Showing <span id="count-visible" class="font-semibold text-[var(--foreground)]">{totalCount}</span> of {totalCount}
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .category-chip.active {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-color: var(--ring);
+    font-weight: 600;
+  }
+</style>

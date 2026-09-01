@@ -1,0 +1,511 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import FilterBar from '../components/FilterBar.astro';
+import GalleryGrid from '../components/GalleryGrid.astro';
+import LightboxModal from '../components/LightboxModal.astro';
+import Footer from '../components/Footer.astro';
+import type { Wallpaper } from '../components/WallpaperCard.astro';
+
+// Read generated manifest.json
+const manifestPath = path.join(process.cwd(), 'public', 'manifest.json');
+let wallpapers: Wallpaper[] = [];
+
+try {
+  const fileContent = fs.readFileSync(manifestPath, 'utf-8');
+  wallpapers = JSON.parse(fileContent);
+} catch (e) {
+  console.error("Could not read manifest.json, please run scripts/generate-manifest.mjs first", e);
+}
+
+// Calculate unique categories and item counts
+const categoryCounts: Record<string, number> = {};
+for (const w of wallpapers) {
+  categoryCounts[w.category] = (categoryCounts[w.category] || 0) + 1;
+}
+
+const categories = Object.keys(categoryCounts)
+  .sort((a, b) => a.localeCompare(b))
+  .map(name => ({
+    name,
+    count: categoryCounts[name]
+  }));
+
+const totalCount = wallpapers.length;
+---
+
+<Layout title="mylinuxforwork/wallpaper — Curated 4K Desktop Gallery">
+  
+  <Header totalCount={totalCount} />
+  
+  <main class="flex-1">
+    
+    <!-- Hero Header Banner -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 text-center md:text-left flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="space-y-2 max-w-2xl">
+        <h2 class="text-3xl sm:text-4xl md:text-5xl font-serif font-bold tracking-tight text-[var(--foreground)]">
+          Curated Desktop Wallpapers
+        </h2>
+        <p class="text-sm sm:text-base text-[var(--muted-foreground)] leading-relaxed">
+          Explore {totalCount} high-resolution 4K desktop wallpapers. Fast, static, zero-bloat delivery served directly via jsDelivr CDN.
+        </p>
+      </div>
+
+      <!-- Quick Category Pills / Hero Badges -->
+      <div class="flex flex-wrap items-center justify-center md:justify-end gap-2 text-xs font-mono text-[var(--muted-foreground)]">
+        <span class="px-3 py-1 rounded-full bg-[var(--muted)] border border-[var(--border)]">
+          ✨ 4K Resolution
+        </span>
+        <span class="px-3 py-1 rounded-full bg-[var(--muted)] border border-[var(--border)]">
+          ⚡ WebP Thumbnails
+        </span>
+        <span class="px-3 py-1 rounded-full bg-[var(--muted)] border border-[var(--border)]">
+          🌿 GPL-2.0 License
+        </span>
+      </div>
+    </section>
+
+    <!-- Filter & Search Bar -->
+    <FilterBar categories={categories} totalCount={totalCount} />
+
+    <!-- Gallery Grid -->
+    <GalleryGrid wallpapers={wallpapers} />
+
+  </main>
+
+  <!-- Lightbox Modal -->
+  <LightboxModal />
+
+  <!-- Footer -->
+  <Footer />
+
+</Layout>
+
+<!-- Client Side Interactive Controller Script -->
+<script>
+  import gsap from 'gsap';
+  import type { Wallpaper } from '../components/WallpaperCard.astro';
+
+  interface FavoritesMap {
+    [key: string]: boolean;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Collect DOM Elements
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.wallpaper-card'));
+    const chips = Array.from(document.querySelectorAll<HTMLElement>('.category-chip'));
+    const searchInput = document.getElementById('search-input') as HTMLInputElement | null;
+    const searchClear = document.getElementById('search-clear') as HTMLButtonElement | null;
+    const countVisible = document.getElementById('count-visible');
+    const emptyState = document.getElementById('empty-state');
+    const btnResetFilters = document.getElementById('btn-reset-filters');
+    const btnShuffle = document.getElementById('btn-shuffle');
+    const btnFavorites = document.getElementById('btn-favorites');
+    const favCountPill = document.getElementById('fav-count');
+
+    // Lightbox Elements
+    const lightboxModal = document.getElementById('lightbox-modal');
+    const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+    const lightboxLoader = document.getElementById('lightbox-loader');
+    const lightboxClose = document.getElementById('lightbox-close');
+    const lightboxPrev = document.getElementById('lightbox-prev');
+    const lightboxNext = document.getElementById('lightbox-next');
+    const lbTitle = document.getElementById('lb-title');
+    const lbCategory = document.getElementById('lb-category');
+    const lbResolution = document.getElementById('lb-resolution');
+    const lbFilesize = document.getElementById('lb-filesize');
+    const lbFormat = document.getElementById('lb-format');
+    const lbOrientation = document.getElementById('lb-orientation');
+    const lbIndex = document.getElementById('lb-index');
+    const lbFilename = document.getElementById('lb-filename');
+    const lbBtnDownload = document.getElementById('lb-btn-download');
+    const lbDownloadText = document.getElementById('lb-download-text');
+    const lbBtnCopy = document.getElementById('lb-btn-copy');
+    const lbBtnFav = document.getElementById('lb-btn-fav');
+    const copyBtnText = document.getElementById('copy-btn-text');
+
+    // Application State
+    let activeCategory = 'All';
+    let searchQuery = '';
+    let showingOnlyFavs = false;
+    let visibleCards: HTMLElement[] = [...cards];
+    let currentLightboxIndex = -1;
+
+    // Load Favorites from LocalStorage
+    let favorites: FavoritesMap = {};
+    try {
+      favorites = JSON.parse(localStorage.getItem('wallpaper_favs') || '{}');
+    } catch {
+      favorites = {};
+    }
+
+    // Update Favorites Badges and Heart States
+    function updateFavoritesUI() {
+      const favIds = Object.keys(favorites).filter(id => favorites[id]);
+      const count = favIds.length;
+
+      if (favCountPill) {
+        if (count > 0) {
+          favCountPill.textContent = String(count);
+          favCountPill.classList.remove('hidden');
+        } else {
+          favCountPill.classList.add('hidden');
+        }
+      }
+
+      // Update Card Heart Buttons
+      cards.forEach(card => {
+        const id = card.dataset.id;
+        const favBtn = card.querySelector('.card-fav-btn');
+        const svg = favBtn?.querySelector('svg');
+        if (id && favorites[id]) {
+          svg?.classList.add('heart-active');
+        } else {
+          svg?.classList.remove('heart-active');
+        }
+      });
+    }
+
+    updateFavoritesUI();
+
+    // GSAP Initial Entry Stagger
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReducedMotion && cards.length > 0) {
+      gsap.from(cards.slice(0, 30), {
+        opacity: 0,
+        y: 30,
+        duration: 0.5,
+        stagger: 0.03,
+        ease: 'power2.out'
+      });
+    }
+
+    // Filter Logic Function
+    function filterWallpapers() {
+      visibleCards = [];
+
+      cards.forEach(card => {
+        const cardCategory = card.dataset.category || '';
+        const cardTitle = card.dataset.title || '';
+        const cardId = card.dataset.id || '';
+
+        const categoryMatch = activeCategory === 'All' || cardCategory === activeCategory;
+        const searchMatch = !searchQuery || cardTitle.includes(searchQuery) || cardCategory.toLowerCase().includes(searchQuery);
+        const favMatch = !showingOnlyFavs || favorites[cardId];
+
+        if (categoryMatch && searchMatch && favMatch) {
+          card.style.display = '';
+          visibleCards.push(card);
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      // Update Count Display
+      if (countVisible) {
+        countVisible.textContent = String(visibleCards.length);
+      }
+
+      // Show/Hide Empty State
+      if (visibleCards.length === 0) {
+        emptyState?.classList.remove('hidden');
+        emptyState?.classList.add('flex');
+      } else {
+        emptyState?.classList.add('hidden');
+        emptyState?.classList.remove('flex');
+      }
+    }
+
+    // Category Chip Clicks
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeCategory = chip.dataset.category || 'All';
+        filterWallpapers();
+      });
+    });
+
+    // Search Input Handling
+    let debounceTimer: any = null;
+    searchInput?.addEventListener('input', (e) => {
+      const val = (e.target as HTMLInputElement).value.trim().toLowerCase();
+      searchQuery = val;
+      
+      if (val.length > 0) {
+        searchClear?.classList.remove('hidden');
+      } else {
+        searchClear?.classList.add('hidden');
+      }
+
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        filterWallpapers();
+      }, 150);
+    });
+
+    searchClear?.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchQuery = '';
+        searchClear.classList.add('hidden');
+        filterWallpapers();
+      }
+    });
+
+    // Reset Filters Button in Empty State
+    btnResetFilters?.addEventListener('click', () => {
+      activeCategory = 'All';
+      searchQuery = '';
+      showingOnlyFavs = false;
+      if (searchInput) searchInput.value = '';
+      searchClear?.classList.add('hidden');
+
+      chips.forEach(c => {
+        if (c.dataset.category === 'All') c.classList.add('active');
+        else c.classList.remove('active');
+      });
+
+      btnFavorites?.classList.remove('border-[var(--destructive)]');
+      filterWallpapers();
+    });
+
+    // Favorites Filter Button
+    btnFavorites?.addEventListener('click', () => {
+      showingOnlyFavs = !showingOnlyFavs;
+      if (showingOnlyFavs) {
+        btnFavorites.classList.add('border-[var(--destructive)]', 'bg-[var(--sidebar-accent)]');
+      } else {
+        btnFavorites.classList.remove('border-[var(--destructive)]', 'bg-[var(--sidebar-accent)]');
+      }
+      filterWallpapers();
+    });
+
+    // Heart Favorite Button Click Handler (Event Delegation)
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const favBtn = target.closest('.card-fav-btn');
+      if (favBtn) {
+        e.stopPropagation();
+        const favId = (favBtn as HTMLElement).dataset.favId;
+        if (favId) {
+          favorites[favId] = !favorites[favId];
+          localStorage.setItem('wallpaper_favs', JSON.stringify(favorites));
+          updateFavoritesUI();
+          if (showingOnlyFavs) filterWallpapers();
+        }
+      }
+    });
+
+    // Surprise Me / Shuffle Button
+    btnShuffle?.addEventListener('click', () => {
+      if (visibleCards.length === 0) return;
+      const randomIndex = Math.floor(Math.random() * visibleCards.length);
+      const targetCard = visibleCards[randomIndex];
+
+      targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Pulsing Glow Highlight
+      targetCard.classList.add('ring-4', 'ring-[var(--primary)]', 'scale-105');
+      setTimeout(() => {
+        targetCard.classList.remove('ring-4', 'ring-[var(--primary)]', 'scale-105');
+        openLightbox(randomIndex);
+      }, 500);
+    });
+
+    // Lightbox Controller Logic
+    function openLightbox(index: number) {
+      if (index < 0 || index >= visibleCards.length) return;
+      currentLightboxIndex = index;
+
+      const card = visibleCards[index];
+      const dataStr = card.dataset.wallpaper;
+      if (!dataStr) return;
+
+      const data: Wallpaper = JSON.parse(dataStr);
+
+      // Populate Metadata Drawer
+      if (lbTitle) lbTitle.textContent = data.title;
+      if (lbCategory) lbCategory.textContent = data.category;
+      if (lbResolution) lbResolution.textContent = `${data.width} × ${data.height}`;
+      if (lbFilesize) lbFilesize.textContent = data.fileSizeFormatted;
+      if (lbFormat) lbFormat.textContent = data.format;
+      if (lbOrientation) lbOrientation.textContent = data.orientation;
+      if (lbIndex) lbIndex.textContent = `${index + 1} of ${visibleCards.length}`;
+      if (lbFilename) lbFilename.textContent = data.filename;
+
+      // Show Loader & Load Image
+      if (lightboxLoader) lightboxLoader.style.display = 'flex';
+      if (lightboxImg) {
+        lightboxImg.classList.add('opacity-0');
+        lightboxImg.src = data.cdnUrl;
+
+        lightboxImg.onload = () => {
+          if (lightboxLoader) lightboxLoader.style.display = 'none';
+          lightboxImg.classList.remove('opacity-0');
+        };
+
+        lightboxImg.onerror = () => {
+          // Fallback to raw github CDN if jsDelivr fails
+          lightboxImg.src = data.cdnFallbackUrl;
+        };
+      }
+
+      // Update Lightbox Heart Button State
+      updateLightboxHeartState(data.id);
+
+      // Open Modal
+      if (lightboxModal) {
+        lightboxModal.classList.remove('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+
+    function closeLightbox() {
+      if (lightboxModal) {
+        lightboxModal.classList.add('opacity-0', 'pointer-events-none');
+        document.body.style.overflow = '';
+      }
+      if (lightboxImg) {
+        lightboxImg.src = '';
+      }
+    }
+
+    function updateLightboxHeartState(id: string) {
+      const svg = lbBtnFav?.querySelector('svg');
+      if (favorites[id]) {
+        svg?.classList.add('heart-active');
+      } else {
+        svg?.classList.remove('heart-active');
+      }
+    }
+
+    // Lightbox Card Click Delegation
+    cards.forEach(card => {
+      card.addEventListener('click', (e) => {
+        const favBtn = (e.target as HTMLElement).closest('.card-fav-btn');
+        if (favBtn) return; // Prevent lightbox opening if clicking heart
+
+        const index = visibleCards.indexOf(card);
+        if (index !== -1) {
+          // Use View Transitions API if supported
+          if ('startViewTransition' in document && typeof (document as any).startViewTransition === 'function') {
+            (document as any).startViewTransition(() => openLightbox(index));
+          } else {
+            openLightbox(index);
+          }
+        }
+      });
+    });
+
+    // Lightbox Navigation Controls
+    lightboxClose?.addEventListener('click', closeLightbox);
+    lightboxPrev?.addEventListener('click', () => {
+      if (visibleCards.length === 0) return;
+      const prevIndex = (currentLightboxIndex - 1 + visibleCards.length) % visibleCards.length;
+      openLightbox(prevIndex);
+    });
+    lightboxNext?.addEventListener('click', () => {
+      if (visibleCards.length === 0) return;
+      const nextIndex = (currentLightboxIndex + 1) % visibleCards.length;
+      openLightbox(nextIndex);
+    });
+
+    // Lightbox Download Action (Blob Fetch to bypass cross-origin browser view behavior)
+    let isDownloading = false;
+
+    lbBtnDownload?.addEventListener('click', async () => {
+      if (isDownloading) return;
+      if (currentLightboxIndex < 0 || currentLightboxIndex >= visibleCards.length) return;
+      const card = visibleCards[currentLightboxIndex];
+      const dataStr = card.dataset.wallpaper;
+      if (!dataStr) return;
+      const data: Wallpaper = JSON.parse(dataStr);
+
+      const originalText = lbDownloadText?.textContent || 'Download 4K Original';
+      if (lbDownloadText) lbDownloadText.textContent = 'Downloading...';
+      isDownloading = true;
+
+      try {
+        const response = await fetch(data.cdnUrl);
+        if (!response.ok) throw new Error('Fetch failed');
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = data.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(blobUrl);
+
+        if (lbDownloadText) lbDownloadText.textContent = 'Downloaded!';
+        setTimeout(() => {
+          if (lbDownloadText) lbDownloadText.textContent = originalText;
+          isDownloading = false;
+        }, 2000);
+      } catch (err) {
+        console.error('Blob download error, falling back to direct open:', err);
+        window.open(data.cdnUrl, '_blank');
+        if (lbDownloadText) lbDownloadText.textContent = originalText;
+        isDownloading = false;
+      }
+    });
+
+    // Lightbox Favorite Toggle Action
+    lbBtnFav?.addEventListener('click', () => {
+      if (currentLightboxIndex < 0 || currentLightboxIndex >= visibleCards.length) return;
+      const card = visibleCards[currentLightboxIndex];
+      const id = card.dataset.id;
+      if (id) {
+        favorites[id] = !favorites[id];
+        localStorage.setItem('wallpaper_favs', JSON.stringify(favorites));
+        updateFavoritesUI();
+        updateLightboxHeartState(id);
+      }
+    });
+
+    // Lightbox Copy Link Action
+    lbBtnCopy?.addEventListener('click', async () => {
+      if (currentLightboxIndex < 0 || currentLightboxIndex >= visibleCards.length) return;
+      const card = visibleCards[currentLightboxIndex];
+      const dataStr = card.dataset.wallpaper;
+      if (!dataStr) return;
+      const data: Wallpaper = JSON.parse(dataStr);
+
+      try {
+        await navigator.clipboard.writeText(data.cdnUrl);
+        if (copyBtnText) copyBtnText.textContent = 'Copied!';
+        setTimeout(() => {
+          if (copyBtnText) copyBtnText.textContent = 'Copy Link';
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy CDN link', err);
+      }
+    });
+
+    // Keyboard Shortcuts (Arrow Left, Arrow Right, Esc)
+    window.addEventListener('keydown', (e) => {
+      if (lightboxModal && !lightboxModal.classList.contains('pointer-events-none')) {
+        if (e.key === 'Escape') {
+          closeLightbox();
+        } else if (e.key === 'ArrowLeft') {
+          lightboxPrev?.click();
+        } else if (e.key === 'ArrowRight') {
+          lightboxNext?.click();
+        }
+      }
+    });
+
+    // Close when clicking modal backdrop outside image
+    lightboxModal?.addEventListener('click', (e) => {
+      if (e.target === lightboxModal) {
+        closeLightbox();
+      }
+    });
+
+  });
+</script>
