@@ -1,1 +1,4 @@
 effects
+src/bin/
+src/coverage.out
+src/logs/
